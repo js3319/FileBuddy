@@ -32,6 +32,7 @@ public class GUI {
 	File file;
 	String PS;
 	File fileName;
+	boolean isSelected=false;
 	private final int WIDTH = 40;
 	private final int HEIGHT = 40;
 	JFrame frame=new JFrame();
@@ -75,6 +76,7 @@ public class GUI {
 		btnSelectFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				getUserInput();
+				System.out.println(fileName.length());
 				System.out.println("Selecting File");
 				
 				
@@ -87,9 +89,11 @@ public class GUI {
 		btnStart.setFont(new Font("Javanese Text", Font.BOLD, 14));
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(isSelected) {
+				createFolder(fileName.getPath());
 				massMove(fileName);
 				System.out.println("Start Organizing");
-				
+				}
 				
 				
 			}
@@ -97,13 +101,16 @@ public class GUI {
 		btnStart.setBounds(196, 180, 89, 35);
 		frame.getContentPane().add(btnStart);
 		
-		JButton btnNewFolder = new JButton("New Folder");
+		JButton btnNewFolder = new JButton("Open File");
 		btnNewFolder.setFont(new Font("Javanese Text", Font.BOLD, 12));
 		btnNewFolder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(isSelected) {
+				openFile();
 				
-				System.out.println("Creating New Folder");
+				System.out.println("Opening File");
 				
+				}
 				
 			}
 		});
@@ -142,7 +149,7 @@ public class GUI {
 		    input=selectedFile.getAbsolutePath();
 		    works = selectedFile.exists();
 		}
-		
+		isSelected=true;
 		//input = JOptionPane.showInputDialog("Enter Directory");	
 		
 		desktop = Desktop.getDesktop();
@@ -160,14 +167,15 @@ public class GUI {
 //		}
 			File a = new File(input);
 		File file = new File (a.getParent());
-		try {
-		desktop.open(file);
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+//		try {
+//		desktop.open(file);
+//	} catch (IOException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
 		
 		System.out.println(input);
+		fileName=a;
 	//	System.out.println(desktop);
 		if(file.isDirectory()) {
 			System.out.println("is directory");
@@ -179,16 +187,16 @@ public class GUI {
 		 
 		 if(works=false)
 		getUserInput();
-		 try {
-				FileRetriever finder= new FileRetriever(input);
-		
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("finder input invalid");
-				getUserInput();
-			}
-		 
+//		 try {
+//				FileRetriever finder= new FileRetriever(input);
+//		
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				System.out.println("finder input invalid");
+//				getUserInput();
+//			}
+//		 
 	//	change = JOptionPane.showInputDialog("Enter Desired Change");	
 	}
 //	public void openFile(String in) {
@@ -273,6 +281,18 @@ public class GUI {
 				//	System.out.println(file.getParent()+PS+getFileExtension(file.getName()));
 
 			}
+		}
+	}
+	public void openFile(){
+		try {
+			String parent = fileName.getParent();
+			File folder = new File(parent);
+			File openLoc = new File(parent+PS+getFileExtension(fileName.getName()));
+			System.out.println(openLoc);
+			desktop.open(openLoc);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
