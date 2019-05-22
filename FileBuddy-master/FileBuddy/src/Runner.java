@@ -4,9 +4,7 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.knowm.xchart.XChartPanel;
 
-import org.knowm.xchart.PieChart;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,8 +13,17 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.BitmapEncoder.BitmapFormat;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.style.PieStyler.AnnotationType;
+import org.knowm.xchart.style.Styler.ChartTheme;
 
-public class Runner {
+
+
+public class Runner{
 	String input;
 	String change;
 	Desktop desktop;
@@ -30,6 +37,7 @@ public class Runner {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 					window = new GUI();
+					
 					checkOS();
 					window.frame.setVisible(true);
 					//start();
@@ -38,11 +46,7 @@ public class Runner {
 			}
 		});
 	} 
-	public static void main(String[]args) {
-		Runner run = new Runner();		
-
-
-	}
+	
 
 
 	public void getUserInput() {
@@ -145,9 +149,19 @@ public class Runner {
 			window.setOS("\\");
 		}
 	}
+	
 
 
-}
+	public static void main(String[]args) throws IOException {
+		Runner run = new Runner();		
+		
+	}
+	}
+	
+	
+	
+
+
 
 
 

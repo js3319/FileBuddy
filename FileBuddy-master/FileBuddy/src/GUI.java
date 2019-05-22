@@ -1,14 +1,17 @@
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.Window;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.imageio.ImageIO;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 
 import java.awt.BorderLayout;
@@ -26,11 +29,17 @@ import javax.swing.SwingConstants;
 
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.style.PieStyler.AnnotationType;
+import org.knowm.xchart.style.Styler.ChartTheme;
+
+import com.sun.glass.events.KeyEvent;
 
 import java.awt.Button;
 import javax.swing.JTextField;
@@ -45,24 +54,32 @@ import java.awt.Image;
 
 
 
-public class GUI {
+
+
+public class GUI{
 	private String input;
 	private String change;
 	public Desktop desktop;
 	private File file;
 	public String PS;
-	private JPanel panel;
-	private Image backgroundImage;
-	private JPanel panel2;
+	public JPanel panel;
+	private Image backgroundImage;  
 	public File fileName;
 	private boolean isOrganized=false;
 	private boolean isSelected=false;
 	private final int WIDTH = 40;
 	private final int HEIGHT = 40;
 	private List outPartition;
+	boolean changer = true;
+	PieChart chart;
+	
+	
+
+
 	private static DecimalFormat df = new DecimalFormat("0.00");
 	
-	JFrame frame=new JFrame();
+	JFrame frame;
+	
 
 	/**
 	 * Launch the application.
@@ -95,17 +112,21 @@ public class GUI {
 	private void initialize() {
 		
 		frame = new JFrame();
+		frame.setLayout(new BorderLayout());
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().setBackground(new Color(240, 255, 240));
-		frame.setBounds(100, 100, 838, 593);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Image image = getImage("files.png");
 		// Image img2 = img.getScaledInstance(625, 418, Image.SCALE_DEFAULT);
 		frame.setIconImage(image);
 		backgroundImage = image;
+		createChart();
 		
 
-		panel = new JPanel() 
+		JPanel pnlChart =new XChartPanel(chart);
+
+		JPanel panel = new JPanel()
+		
 
 {
 			@Override
@@ -118,12 +139,16 @@ public class GUI {
 				g.drawImage(img, 0, 0, w, h, null);
 			}
 		};
+		  
+	
+		
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setIcon(new ImageIcon(image));
-
+		
 		panel.setPreferredSize(new Dimension(800, 600));
 		// panel.add(lblNewLabel);
-		frame.getContentPane().add(panel);
+		
+		frame.getContentPane().add(panel, BorderLayout.WEST);
 
 		JButton btnNewButton = new JButton("Select File");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -171,9 +196,35 @@ public class GUI {
 			}
 		});
 		
-		JButton btnNewButton_3 = new JButton("File finder");
+		JButton btnNewButton_3 = new JButton("NIGGA");
+		btnNewButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			
+				if(changer) {
+				frame.add(pnlChart, BorderLayout.EAST);
+				frame.validate();
+				frame.repaint();
+				}
+				else {
+					frame.remove(pnlChart);
+					frame.validate();
+					frame.repaint();
+				}
+				changer=!changer;
+				
+			
+				
+			}
+		});
 		
 		JButton btnNewButton_4 = new JButton("New button");
+		btnNewButton_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.remove(pnlChart);
+				frame.revalidate();
+				frame.repaint();
+			}
+	});
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -426,7 +477,28 @@ public class GUI {
 		        }
 			System.out.println(filesSize);
 		    }
-	
+
+	public void createChart() {
+		chart = new PieChartBuilder().width(500).height(500).title("My Pie Chart").theme(ChartTheme.GGPlot2).build();
+		System.out.println(frame.getWidth());
+	    // Customize Chart
+	    chart.getStyler().setLegendVisible(false);
+	    chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+	    chart.getStyler().setAnnotationDistance(1.15);
+	    chart.getStyler().setPlotContentSize(.7);
+	    chart.getStyler().setStartAngleInDegrees(90);
+
+	    // Series
+	    //A
+	    chart.addSeries("Prague", 2);
+	    chart.addSeries("Dresden", 4);
+	    chart.addSeries("Munich", 34);
+	    chart.addSeries("Hamburg", 22);
+	    chart.addSeries("Berlin", 29);
+	    
+	}
+
 }
+
 	
 
