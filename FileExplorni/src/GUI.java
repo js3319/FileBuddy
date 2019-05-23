@@ -2,8 +2,21 @@
 import java.awt.EventQueue;
 import java.awt.Point;
 
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.BitmapEncoder.BitmapFormat;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYSeries;
+import org.knowm.xchart.style.PieStyler.AnnotationType;
+import org.knowm.xchart.style.Styler.ChartTheme;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -12,30 +25,56 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
+
+import org.knowm.xchart.PieChartBuilder;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.internal.chartpart.Chart;
+import org.knowm.xchart.style.PieStyler.AnnotationType;
+import org.knowm.xchart.style.Styler.ChartTheme;
+
+import com.sun.glass.events.MouseEvent;
+
 import java.awt.Button;
 import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Desktop;
+import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Image;
+import javax.swing.JTabbedPane;
+import javax.swing.JPanel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JToggleButton;
 
 public class GUI {
-	String input;
-	String change;
-	Desktop desktop;
-	File file;
-	String PS;
-	File fileName;
-	boolean isSelected=false;
+	private String input;
+	private String change;
+	public Desktop desktop;
+	private File file;
+	public String PS;
+	public JPanel panel;
+	private Image backgroundImage;
+	public File fileName;
+	private boolean isOrganized = false;
+	private boolean isSelected = false;
 	private final int WIDTH = 40;
 	private final int HEIGHT = 40;
-	JFrame frame=new JFrame();
+	private List outPartition;
+	boolean changer = true;
+	PieChart chart;
+
+	private static DecimalFormat df = new DecimalFormat("0.00");
+
+	JFrame frame;
 
 	/**
 	 * Launch the application.
@@ -56,7 +95,9 @@ public class GUI {
 	/**
 	 * Create the application.
 	 */
+
 	public GUI() {
+
 		initialize();
 	}
 
@@ -64,99 +105,172 @@ public class GUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+
+		frame = new JFrame();
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		frame.setBounds(50, 50, 1382, 547);
+
 		frame.getContentPane().setBackground(new Color(240, 255, 240));
-		frame.setBounds(100, 100, 503, 338);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		
+		Image image = getImage("files2.png");
+		// Image img2 = img.getScaledInstance(625, 418, Image.SCALE_DEFAULT);
+		frame.setIconImage(image);
+		backgroundImage = image;
+		createChart();
+
+		JPanel pnlChart = new XChartPanel(chart);
 		frame.getContentPane().setLayout(null);
-		
-		JButton btnSelectFile = new JButton("Select File");
-		btnSelectFile.setFont(new Font("Javanese Text", Font.BOLD, 12));
-		btnSelectFile.addActionListener(new ActionListener() {
+
+		JPanel panel = new JPanel()
+
+		{
+			@Override
+			public void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				int w = this.getWidth(), h = this.getHeight();
+
+				Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+				System.out.println(w + "  " + h + " img " + img);
+				g.drawImage(img, 0, 0, w, h, null);
+			}
+		};
+		panel.setBounds(0, 0, 700, 707);
+
+		panel.setPreferredSize(new Dimension(800, 800));
+		// panel.add(lblNewLabel);
+
+		frame.getContentPane().add(panel);
+		panel.setLayout(null);
+
+		JButton btnNewButton = new JButton("Select File");
+		btnNewButton.addActionListener(new ActionListener() {
+			// Put the action for making the folder
 			public void actionPerformed(ActionEvent e) {
 				getUserInput();
 				System.out.println(fileName.length());
 				System.out.println("Selecting File");
-				
-				
 			}
 		});
-		btnSelectFile.setBounds(346, 111, 103, 38);
-		frame.getContentPane().add(btnSelectFile);
-		
-		JButton btnStart = new JButton("Start");
-		btnStart.setFont(new Font("Javanese Text", Font.BOLD, 14));
-		btnStart.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(isSelected) {
-				createFolder(fileName.getPath());
-				massMove(fileName);
-				System.out.println("Start Organizing");
-				}
-				
-				
-			}
-		});
-		btnStart.setBounds(196, 180, 89, 35);
-		frame.getContentPane().add(btnStart);
-		
-		JButton btnNewFolder = new JButton("Open File");
-		btnNewFolder.setFont(new Font("Javanese Text", Font.BOLD, 12));
-		btnNewFolder.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(isSelected) {
-				openFile();
-				
-				System.out.println("Opening File");
-				
-				}
-				
-			}
-		});
-		btnNewFolder.setBounds(46, 114, 103, 35);
-		frame.getContentPane().add(btnNewFolder);
-		
-		JLabel lblNewLabel = new JLabel("                    File Organizer");
-		lblNewLabel.setToolTipText("");
-		lblNewLabel.setFont(new Font("Nirmala UI", Font.BOLD, 23));
-		lblNewLabel.setBounds(46, 29, 389, 67);
-		frame.getContentPane().add(lblNewLabel);
-		
-		JLabel label = new JLabel("");
-		Image img = new ImageIcon(this.getClass().getResource("res/images/files.png")).getImage();
-		label.setIcon(new ImageIcon(img));
-		label.setBounds(0, 0, 487, 299);
-		frame.getContentPane().add(label);
-		
-		
-		
-		
+		btnNewButton.setBounds(10, 28, 89, 23);
+		panel.add(btnNewButton);
 
-	
-}
+		JButton btnNewButton_1 = new JButton("Open File");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			// Put the action for Selecting File
+			public void actionPerformed(ActionEvent e) {
+
+				if (isSelected) {
+					openFile();
+
+					System.out.println("Opening File");
+
+				}
+			}
+		});
+		btnNewButton_1.setBounds(10, 52, 89, 23);
+		panel.add(btnNewButton_1);
+
+		JButton btnStart = new JButton("Start");
+
+		btnStart.addActionListener(new ActionListener() {
+			// Put the action to Start the Program
+			public void actionPerformed(ActionEvent e) {
+				if (isSelected) {
+					createFolder(fileName.getPath());
+					massMove(fileName);
+					System.out.println("Start Organizing");
+				}
+			}
+		});
+		btnStart.setBounds(10, 74, 89, 23);
+		panel.add(btnStart);
+
+		JButton btnNewButton_2 = new JButton("Show Directory");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getDirectory(fileName);
+			}
+		});
+		btnNewButton_2.setBounds(10, 98, 105, 35);
+		panel.add(btnNewButton_2);
+
+		JButton btnNewButton_4 = new JButton("New button");
+		btnNewButton_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.remove(pnlChart);
+				frame.revalidate();
+				frame.repaint();
+			}
+		});
+
+		btnNewButton_4.setBounds(10, 155, 89, 23);
+		panel.add(btnNewButton_4);
+
+		JLabel lblFileOrganizer = new JLabel("File Organizer");
+		lblFileOrganizer.setFont(new Font("Segoe Print", Font.BOLD, 17));
+		lblFileOrganizer.setHorizontalAlignment(SwingConstants.CENTER);
+		lblFileOrganizer.setBounds(224, 56, 125, 57);
+		panel.add(lblFileOrganizer);
+
+		JPanel panel_1 = new JPanel() {
+			@Override
+			public void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				int w = this.getWidth(), h = this.getHeight();
+
+				Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+				System.out.println(w + "  " + h + " img " + img);
+				g.drawImage(img, 0, 0, w, h, null);
+			}
+		};
+
+		panel_1.setBounds(700, 0, 666, 707);
+		frame.getContentPane().add(panel_1);
+
+		JButton btnNewButton_3 = new JButton("Stttarrt");
+		btnNewButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				if (changer) {
+					panel_1.add(pnlChart);
+					frame.validate();
+					frame.repaint();
+				} else {
+					frame.remove(pnlChart);
+					frame.validate();
+					frame.repaint();
+				}
+				changer = !changer;
+
+			}
+		});
+
+		btnNewButton_3.setBounds(10, 132, 89, 23);
+		panel.add(btnNewButton_3);
+	}
+
 	public void getUserInput() {
-		//mac os is forward slash /users/js/xxxxxxxx
-		//ex. "/Users/js/Downloads/IMG_1388.jpg/"
-		//perhaps put hints to help user guide, or adapt gui to have user select directory path
+		// mac os is forward slash /users/js/xxxxxxxx
+		// ex. "/Users/js/Downloads/IMG_1388.jpg/"
+		// perhaps put hints to help user guide, or adapt gui to have user select
+		// directory path
 		boolean works;
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 		int result = fileChooser.showOpenDialog(fileChooser);
 		if (result == JFileChooser.APPROVE_OPTION) {
-		    File selectedFile = fileChooser.getSelectedFile();
-		    System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-		    input=selectedFile.getAbsolutePath();
-		    works = selectedFile.exists();
+			File selectedFile = fileChooser.getSelectedFile();
+			System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+			input = selectedFile.getAbsolutePath();
+			works = selectedFile.exists();
 		}
-		isSelected=true;
-		//input = JOptionPane.showInputDialog("Enter Directory");	
-		
+		isSelected = true;
+		// input = JOptionPane.showInputDialog("Enter Directory");
+
 		desktop = Desktop.getDesktop();
-		if(Desktop.isDesktopSupported()) {
-			
-			
-		//URI is essentially url, this segment opens 
+		if (Desktop.isDesktopSupported()) {
+
+			// URI is essentially url, this segment opens
 //		URI uri;
 //		try {
 //			uri = new URI("https://www.reddit.com/");
@@ -166,27 +280,26 @@ public class GUI {
 //			e1.printStackTrace();
 //		}
 			File a = new File(input);
-		File file = new File (a.getParent());
+			File file = new File(a.getParent());
 //		try {
 //		desktop.open(file);
 //	} catch (IOException e) {
 //		// TODO Auto-generated catch block
 //		e.printStackTrace();
 //	}
-		
-		System.out.println(input);
-		fileName=a;
-	//	System.out.println(desktop);
-		if(file.isDirectory()) {
-			System.out.println("is directory");
-		}
-		}
-		else{
+
+			System.out.println(input);
+			fileName = a;
+			// System.out.println(desktop);
+			if (file.isDirectory()) {
+				System.out.println("is directory");
+			}
+		} else {
 			System.out.println("desktop not supported!");
 		}
-		 
-		 if(works=false)
-		getUserInput();
+
+		if (works = false)
+			getUserInput();
 //		 try {
 //				FileRetriever finder= new FileRetriever(input);
 //		
@@ -197,8 +310,9 @@ public class GUI {
 //				getUserInput();
 //			}
 //		 
-	//	change = JOptionPane.showInputDialog("Enter Desired Change");	
+		// change = JOptionPane.showInputDialog("Enter Desired Change");
 	}
+
 //	public void openFile(String in) {
 //		File file=new File(in);
 //		desktop = Desktop.getDesktop();
@@ -212,48 +326,49 @@ public class GUI {
 //		}
 //	}
 	public void createFolder(String name) {
-		fileName=new File(name);	
-		//fileName is the original input
+		fileName = new File(name);
+		// fileName is the original input
 		String parent = fileName.getParent();
-		//gets parent directory
-		String folderName = parent +PS+ getFileExtension(name);
-		//generates foldername based on parent directory and file extension name
-		System.out.println (folderName + "1");
+		// gets parent directory
+		String folderName = parent + PS + getFileExtension(name);
+		// generates foldername based on parent directory and file extension name
+		System.out.println(folderName + "1");
 		new File(folderName).mkdirs();
 		System.out.println(getFileExtension(name + "2"));
 	}
-	
+
 	public void setOS(String s) {
-		PS= s;
+		PS = s;
 	}
-	
+
 	public String getFileExtension(String name) {
-		if(name.indexOf(".")>0) {
+		if (name.indexOf(".") > 0) {
 
-
-			return(name.substring(1+name.lastIndexOf(".")));}
+			return (name.substring(1 + name.lastIndexOf(".")));
+		}
 		return "";
 	}
 
 	public void openFolder() {
 
 	}
+
 	public void moveFile(String original, String newLoc) {
-		File select= new File(original);
-		System.out.println(newLoc+actualFileName(original)+"3");
-		//System.out.println(select.getName()+"4");
+		File select = new File(original);
+		System.out.println(newLoc + actualFileName(original) + "3");
+		// System.out.println(select.getName()+"4");
 
-		select.renameTo(new File(newLoc+PS+actualFileName(original)));
-
+		select.renameTo(new File(newLoc + PS + actualFileName(original)));
 
 	}
+
 	public String actualFileName(String sample) {
 		int count = 1;
-		for(int x=sample.length();x>0;x--) {
-			if (sample.substring(x-1,x).equals(PS)){
+		for (int x = sample.length(); x > 0; x--) {
+			if (sample.substring(x - 1, x).equals(PS)) {
 				count--;
-				if(count ==0) {
-					return PS+sample.substring(x);
+				if (count == 0) {
+					return PS + sample.substring(x);
 				}
 
 			}
@@ -264,35 +379,97 @@ public class GUI {
 	public String actualFileName(File file) {
 		return file.getName();
 	}
-	
+
 	public void massMove(File directory) {
 		List<String> results = new ArrayList<String>();
 
-
 		File[] files = new File(directory.getParent()).listFiles();
-		//If this pathname does not denote a directory, then listFiles() returns null. 
+		// If this pathname does not denote a directory, then listFiles() returns null.
 
 		for (File file : files) {
 			if (file.isFile()) {
 				results.add(file.getName());
 			}
-			if(getFileExtension(file.getName()).toLowerCase().equals(getFileExtension(directory.getName()).toLowerCase())){
-				moveFile(file.getPath(),file.getParent()+PS+getFileExtension(file.getName()));
-				//	System.out.println(file.getParent()+PS+getFileExtension(file.getName()));
+			if (getFileExtension(file.getName()).toLowerCase()
+					.equals(getFileExtension(directory.getName()).toLowerCase())) {
+				moveFile(file.getPath(), file.getParent() + PS + getFileExtension(file.getName()));
+				// System.out.println(file.getParent()+PS+getFileExtension(file.getName()));
 
 			}
 		}
 	}
-	public void openFile(){
+
+	public void openFile() {
 		try {
 			String parent = fileName.getParent();
 			File folder = new File(parent);
-			File openLoc = new File(parent+PS+getFileExtension(fileName.getName()));
+			File openLoc;
+			if (isOrganized) {
+				openLoc = new File(parent + PS + getFileExtension(fileName.getName()));
+			} else {
+				openLoc = new File(parent + PS + getFileExtension(fileName.getName()));
+			}
 			System.out.println(openLoc);
 			desktop.open(openLoc);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public Image getImage(String str) {
+		Image img = null;
+		try {
+			img = ImageIO.read(this.getClass().getResource("res/images/" + str));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return img;
+	}
+
+	public void getDirectory(File fileName) {
+
+		// Get all files from a directory.
+
+		File[] fList = new File(fileName.getParent()).listFiles();
+
+		System.out.println("a");
+
+		List<String> filesSize = new ArrayList<String>();
+
+		if (fList != null)
+			for (File file : fList) {
+				if (file.isFile()) {
+					if (file.length() > 100000000)
+						filesSize.add(file.getPath() + ", " + df.format(file.length() / 1000000000.0) + "GB");
+					if (file.length() > 1000000 && file.length() < 100000000)
+						filesSize.add(file.getPath() + ", " + df.format(file.length() / 1000000.0) + "MB");
+					if (file.length() > 1000 && file.length() < 1000000)
+						filesSize.add(file.getPath() + ", " + df.format(file.length() / 1000) + "KB");
+				}
+
+			}
+		System.out.println(filesSize);
+	}
+
+	public void createChart() {
+		chart = new PieChartBuilder().width(500).height(500).title("My Pie Chart").theme(ChartTheme.GGPlot2).build();
+		System.out.println(frame.getWidth());
+		// Customize Chart
+		chart.getStyler().setLegendVisible(false);
+		chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+		chart.getStyler().setAnnotationDistance(1.15);
+		chart.getStyler().setPlotContentSize(.7);
+		chart.getStyler().setStartAngleInDegrees(90);
+
+		// Series
+		// A
+		chart.addSeries("Prague", 2);
+		chart.addSeries("Dresden", 4);
+		chart.addSeries("Munich", 34);
+		chart.addSeries("Hamburg", 22);
+		chart.addSeries("Berlin", 29);
+
 	}
 }
