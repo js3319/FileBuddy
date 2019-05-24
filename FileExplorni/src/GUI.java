@@ -107,21 +107,30 @@ public class GUI {
 	private void initialize() {
 
 		frame = new JFrame();
+		frame.setTitle("File Organizer");
+		frame.setBackground(Color.LIGHT_GRAY);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setBounds(50, 50, 1382, 547);
 
-		frame.getContentPane().setBackground(new Color(240, 255, 240));
+		frame.getContentPane().setBackground(Color.WHITE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		Image image = getImage("files2.png");
+		Image image = getImage("files9.png");
+		Image image2 = getImage("files2.png");
 		// Image img2 = img.getScaledInstance(625, 418, Image.SCALE_DEFAULT);
-		frame.setIconImage(image);
+		frame.setIconImage(image2);
+
 		backgroundImage = image;
 		createChart();
 
 		JPanel pnlChart = new XChartPanel(chart);
 		frame.getContentPane().setLayout(null);
 
-		JPanel panel = new JPanel()
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBackground(Color.WHITE);
+		tabbedPane.setBounds(0, 0, 1366, 707);
+		frame.getContentPane().add(tabbedPane);
+
+		JPanel panel_2 = new JPanel()
 
 		{
 			@Override
@@ -129,20 +138,17 @@ public class GUI {
 				super.paintComponent(g);
 				int w = this.getWidth(), h = this.getHeight();
 
-				Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-				System.out.println(w + "  " + h + " img " + img);
-				g.drawImage(img, 0, 0, w, h, null);
+				// Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_FAST);
+				System.out.println(w + "  " + h + " img " + image);
+				g.drawImage(image, 0, 0, w, h, null);
 			}
 		};
-		panel.setBounds(0, 0, 700, 707);
+		tabbedPane.addTab("Starting", null, panel_2, null);
 
-		panel.setPreferredSize(new Dimension(800, 800));
-		// panel.add(lblNewLabel);
-
-		frame.getContentPane().add(panel);
-		panel.setLayout(null);
+		// panel_2.setPreferredSize(new Dimension(800, 800));
 
 		JButton btnNewButton = new JButton("Select File");
+		btnNewButton.setBounds(127, 206, 105, 43);
 		btnNewButton.addActionListener(new ActionListener() {
 			// Put the action for making the folder
 			public void actionPerformed(ActionEvent e) {
@@ -151,10 +157,11 @@ public class GUI {
 				System.out.println("Selecting File");
 			}
 		});
-		btnNewButton.setBounds(10, 28, 89, 23);
-		panel.add(btnNewButton);
+		panel_2.setLayout(null);
+		panel_2.add(btnNewButton);
 
 		JButton btnNewButton_1 = new JButton("Open File");
+		btnNewButton_1.setBounds(460, 206, 105, 43);
 		btnNewButton_1.addActionListener(new ActionListener() {
 			// Put the action for Selecting File
 			public void actionPerformed(ActionEvent e) {
@@ -167,10 +174,10 @@ public class GUI {
 				}
 			}
 		});
-		btnNewButton_1.setBounds(10, 52, 89, 23);
-		panel.add(btnNewButton_1);
+		panel_2.add(btnNewButton_1);
 
 		JButton btnStart = new JButton("Start");
+		btnStart.setBounds(301, 329, 105, 43);
 
 		btnStart.addActionListener(new ActionListener() {
 			// Put the action to Start the Program
@@ -182,35 +189,7 @@ public class GUI {
 				}
 			}
 		});
-		btnStart.setBounds(10, 74, 89, 23);
-		panel.add(btnStart);
-
-		JButton btnNewButton_2 = new JButton("Show Directory");
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				getDirectory(fileName);
-			}
-		});
-		btnNewButton_2.setBounds(10, 98, 105, 35);
-		panel.add(btnNewButton_2);
-
-		JButton btnNewButton_4 = new JButton("New button");
-		btnNewButton_4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				frame.remove(pnlChart);
-				frame.revalidate();
-				frame.repaint();
-			}
-		});
-
-		btnNewButton_4.setBounds(10, 155, 89, 23);
-		panel.add(btnNewButton_4);
-
-		JLabel lblFileOrganizer = new JLabel("File Organizer");
-		lblFileOrganizer.setFont(new Font("Segoe Print", Font.BOLD, 17));
-		lblFileOrganizer.setHorizontalAlignment(SwingConstants.CENTER);
-		lblFileOrganizer.setBounds(224, 56, 125, 57);
-		panel.add(lblFileOrganizer);
+		panel_2.add(btnStart);
 
 		JPanel panel_1 = new JPanel() {
 			@Override
@@ -223,11 +202,36 @@ public class GUI {
 				g.drawImage(img, 0, 0, w, h, null);
 			}
 		};
+		tabbedPane.addTab("New tab", null, panel_1, null);
 
-		panel_1.setBounds(700, 0, 666, 707);
-		frame.getContentPane().add(panel_1);
+		JButton btnNewButton_2 = new JButton("Show Directory");
+		btnNewButton_2.setBounds(1020, 208, 105, 43);
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getDirectory(fileName);
+			}
+		});
+		panel_2.add(btnNewButton_2);
+
+		JButton btnNewButton_4 = new JButton("New button");
+		btnNewButton_4.setBounds(871, 329, 105, 43);
+		btnNewButton_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.remove(pnlChart);
+				frame.revalidate();
+				frame.repaint();
+			}
+		});
+		panel_2.add(btnNewButton_4);
+
+		JLabel lblFileOrganizer = new JLabel("File Organizer");
+		lblFileOrganizer.setBounds(534, 89, 259, 57);
+		lblFileOrganizer.setFont(new Font("Segoe Print", Font.BOLD, 32));
+		lblFileOrganizer.setHorizontalAlignment(SwingConstants.CENTER);
+		panel_2.add(lblFileOrganizer);
 
 		JButton btnNewButton_3 = new JButton("Stttarrt");
+		btnNewButton_3.setBounds(721, 206, 105, 43);
 		btnNewButton_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -244,9 +248,8 @@ public class GUI {
 
 			}
 		});
+		panel_2.add(btnNewButton_3);
 
-		btnNewButton_3.setBounds(10, 132, 89, 23);
-		panel.add(btnNewButton_3);
 	}
 
 	public void getUserInput() {
