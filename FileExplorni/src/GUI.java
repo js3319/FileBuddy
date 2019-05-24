@@ -161,7 +161,7 @@ public class GUI {
 		panel_2.add(btnNewButton);
 
 		JButton btnNewButton_1 = new JButton("Open File");
-		btnNewButton_1.setBounds(460, 206, 105, 43);
+		btnNewButton_1.setBounds(493, 206, 105, 43);
 		btnNewButton_1.addActionListener(new ActionListener() {
 			// Put the action for Selecting File
 			public void actionPerformed(ActionEvent e) {
@@ -177,7 +177,7 @@ public class GUI {
 		panel_2.add(btnNewButton_1);
 
 		JButton btnStart = new JButton("Start");
-		btnStart.setBounds(301, 329, 105, 43);
+		btnStart.setBounds(299, 206, 105, 43);
 
 		btnStart.addActionListener(new ActionListener() {
 			// Put the action to Start the Program
@@ -213,8 +213,8 @@ public class GUI {
 		});
 		panel_2.add(btnNewButton_2);
 
-		JButton btnNewButton_4 = new JButton("New button");
-		btnNewButton_4.setBounds(871, 329, 105, 43);
+		JButton btnNewButton_4 = new JButton("Remove");
+		btnNewButton_4.setBounds(850, 206, 105, 43);
 		btnNewButton_4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				frame.remove(pnlChart);
@@ -231,7 +231,7 @@ public class GUI {
 		panel_2.add(lblFileOrganizer);
 
 		JButton btnNewButton_3 = new JButton("Stttarrt");
-		btnNewButton_3.setBounds(721, 206, 105, 43);
+		btnNewButton_3.setBounds(674, 206, 105, 43);
 		btnNewButton_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -249,6 +249,18 @@ public class GUI {
 			}
 		});
 		panel_2.add(btnNewButton_3);
+		
+		JButton btnNewButton_5 = new JButton("New button");
+		btnNewButton_5.setBounds(390, 329, 89, 43);
+		panel_2.add(btnNewButton_5);
+		
+		JButton btnNewButton_6 = new JButton("New button");
+		btnNewButton_6.setBounds(773, 329, 89, 43);
+		panel_2.add(btnNewButton_6);
+		
+		JButton btnNewButton_7 = new JButton("New button");
+		btnNewButton_7.setBounds(587, 329, 89, 43);
+		panel_2.add(btnNewButton_7);
 
 	}
 
