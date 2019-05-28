@@ -1,6 +1,7 @@
 
 import java.awt.EventQueue;
 import java.awt.Point;
+import java.awt.Toolkit;
 
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
@@ -71,6 +72,7 @@ public class GUI {
 	private List outPartition;
 	boolean changer = true;
 	PieChart chart;
+	private Dimension dm = Toolkit.getDefaultToolkit().getScreenSize();
 
 	private static DecimalFormat df = new DecimalFormat("0.00");
 
@@ -107,6 +109,7 @@ public class GUI {
 	private void initialize() {
 
 		frame = new JFrame();
+		Dimension dm = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setTitle("File Organizer");
 		frame.setBackground(Color.LIGHT_GRAY);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -114,8 +117,8 @@ public class GUI {
 
 		frame.getContentPane().setBackground(Color.WHITE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		Image image = getImage("files9.png");
-		Image image2 = getImage("files2.png");
+		Image image = getImage("files2.png");
+		Image image2 = getImage("files9.png");
 		// Image img2 = img.getScaledInstance(625, 418, Image.SCALE_DEFAULT);
 		frame.setIconImage(image2);
 
@@ -137,12 +140,31 @@ public class GUI {
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
 				int w = this.getWidth(), h = this.getHeight();
-
-				// Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_FAST);
-				System.out.println(w + "  " + h + " img " + image);
-				g.drawImage(image, 0, 0, w, h, null);
+				g.drawImage(image, 0, 0, frame.getWidth(), frame.getHeight(), null);
+				
+			}};
+				/*
+				int scaledWidth, scaledHeight;
+				ImageIcon imge = new ImageIcon(getImage("files9.png"));
+				int originalWidth = imge.getIconWidth();
+				int originalHeight = imge.getIconHeight();
+				float imageRatio = (int) (originalWidth / originalHeight);
+				float screenRatio = (float) (dm.getWidth() / dm.getHeight());
+				if (imageRatio <= screenRatio) {
+					scaledHeight = (int) dm.getHeight();
+					scaledWidth = (int) (scaledHeight * imageRatio);
+				} else {
+					// The scaled size is based on the width
+					scaledWidth = dm.width;
+					scaledHeight = (int) (scaledWidth / imageRatio);
+				}
+				imge = new ImageIcon(imge.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_FAST));
+				Image img = imge.getImage();
+				g.drawImage(img, 0, 0, null);
 			}
 		};
+		*/
+		panel_2.setBounds(0, 0,(int) (dm.width), (int) (dm.height));
 		tabbedPane.addTab("Starting", null, panel_2, null);
 
 		// panel_2.setPreferredSize(new Dimension(800, 800));
@@ -195,12 +217,26 @@ public class GUI {
 			@Override
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
-				int w = this.getWidth(), h = this.getHeight();
+				int scaledWidth, scaledHeight;
+				ImageIcon imge = new ImageIcon(getImage("files9.png"));
+				int originalWidth = imge.getIconWidth();
+				int originalHeight = imge.getIconHeight();
+				float imageRatio = (int) (originalWidth / originalHeight);
+				float screenRatio = (float) (dm.getWidth() / dm.getHeight());
+				if (imageRatio <= screenRatio) {
+					scaledHeight = (int) dm.getHeight();
+					scaledWidth = (int) (scaledHeight * imageRatio);
+				} else {
+					// The scaled size is based on the width
+					scaledWidth = dm.width;
+					scaledHeight = (int) (scaledWidth / imageRatio);
+				}
+				imge = new ImageIcon(imge.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_FAST));
+				Image img = imge.getImage();
+				g.drawImage(img, 0, 0, null);
 
-				Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-				System.out.println(w + "  " + h + " img " + img);
-				g.drawImage(img, 0, 0, w, h, null);
 			}
+
 		};
 		tabbedPane.addTab("New tab", null, panel_1, null);
 
@@ -249,15 +285,15 @@ public class GUI {
 			}
 		});
 		panel_2.add(btnNewButton_3);
-		
+
 		JButton btnNewButton_5 = new JButton("New button");
 		btnNewButton_5.setBounds(390, 329, 89, 43);
 		panel_2.add(btnNewButton_5);
-		
+
 		JButton btnNewButton_6 = new JButton("New button");
 		btnNewButton_6.setBounds(773, 329, 89, 43);
 		panel_2.add(btnNewButton_6);
-		
+
 		JButton btnNewButton_7 = new JButton("New button");
 		btnNewButton_7.setBounds(587, 329, 89, 43);
 		panel_2.add(btnNewButton_7);
