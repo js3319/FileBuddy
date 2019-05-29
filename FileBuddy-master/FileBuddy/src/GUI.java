@@ -1,6 +1,6 @@
 import java.awt.EventQueue;
 import java.awt.Point;
-import java.awt.Window;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -11,7 +11,6 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 
 import java.awt.BorderLayout;
@@ -23,7 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.prefs.Preferences;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 
@@ -39,8 +40,6 @@ import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.style.PieStyler.AnnotationType;
 import org.knowm.xchart.style.Styler.ChartTheme;
 
-import com.sun.glass.events.KeyEvent;
-
 import java.awt.Button;
 import javax.swing.JTextField;
 import java.awt.Color;
@@ -54,33 +53,41 @@ import java.awt.Image;
 
 
 
-
-
-public class GUI{
+public class GUI {
 	private String input;
 	private String change;
 	public Desktop desktop;
 	private File file;
 	public String PS;
-	public JPanel panel;
-	private Image backgroundImage;  
+	private JPanel panel;
+	private Image backgroundImage;
+	private JPanel panel2;
 	public File fileName;
 	private boolean isOrganized=false;
 	private boolean isSelected=false;
 	private final int WIDTH = 40;
 	private final int HEIGHT = 40;
 	private List outPartition;
-	boolean changer = true;
-	PieChart chart;
-	
-	
-
-
 	private static DecimalFormat df = new DecimalFormat("0.00");
-	
-	JFrame frame;
-	
+	PieChart chart;
+	JFrame frame=new JFrame();
+	boolean changer;
+	JPanel pnlChart;
+	List<String>fileSizes=new ArrayList<String>();
 
+	 List<String> filesSize = new ArrayList<String>();
+		ArrayList<String>uniqueNames=new ArrayList<>();
+		ArrayList<FileData>newContainer = new ArrayList<>();
+
+	ArrayList<String> listWithoutDuplicates =  new ArrayList<String>();
+	List<String> fileList = new ArrayList<String>();
+	Dimension dm = Toolkit.getDefaultToolkit().getScreenSize();
+	   
+	    
+	ArrayList<FileData>fileContainer=new ArrayList<>();
+
+	   
+	  
 	/**
 	 * Launch the application.
 	 */
@@ -112,57 +119,77 @@ public class GUI{
 	private void initialize() {
 		
 		frame = new JFrame();
-		frame.setLayout(new BorderLayout());
+		frame.setTitle("FileBuddy");
+		frame.setBackground(Color.LIGHT_GRAY);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.getContentPane().setBackground(new Color(240, 255, 240));
+		frame.setBounds(50, 50, 1382, 547);
+		frame.getContentPane().setBackground(Color.WHITE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Image image = getImage("files.png");
 		// Image img2 = img.getScaledInstance(625, 418, Image.SCALE_DEFAULT);
 		frame.setIconImage(image);
 		backgroundImage = image;
-		createChart();
+	
+
 		
-
-		JPanel pnlChart =new XChartPanel(chart);
-
-		JPanel panel = new JPanel()
+		frame.getContentPane().setLayout(null);
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBackground(Color.WHITE);
+		tabbedPane.setBounds(0, 0, 1366, 707);
+		frame.getContentPane().add(tabbedPane);
+		panel = new JPanel() 
 		
 
 {
 			@Override
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
-				int w = this.getWidth(), h = this.getHeight();
-
-				Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-				System.out.println(w + "  " + h + " img " + img);
-				g.drawImage(img, 0, 0, w, h, null);
+                int scaledWidth, scaledHeight;
+                ImageIcon imge = new ImageIcon(getImage("files.png"));
+                int originalWidth = imge.getIconWidth();
+                int originalHeight = imge.getIconHeight();
+                float imageRatio = (int) (originalWidth / originalHeight);
+                float screenRatio = (float) (dm.getWidth() / dm.getHeight());
+                if (imageRatio <= screenRatio) {
+                    scaledHeight = (int) dm.getHeight();
+                    scaledWidth = (int) (scaledHeight * imageRatio);
+                } else {
+                    // The scaled size is based on the width
+                    scaledWidth = dm.width;
+                    scaledHeight = (int) (scaledWidth / imageRatio);
+                }
+                imge = new ImageIcon(imge.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_FAST));
+                Image img = imge.getImage();
+                g.drawImage(img, 0, 0, null);
 			}
 		};
-		  
-	
 		
+
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setIcon(new ImageIcon(image));
-		
+
 		panel.setPreferredSize(new Dimension(800, 600));
 		// panel.add(lblNewLabel);
-		
-		frame.getContentPane().add(panel, BorderLayout.WEST);
+		frame.getContentPane().add(panel);
+		tabbedPane.addTab("Starting", null, panel, null);
 
 		JButton btnNewButton = new JButton("Select File");
+		btnNewButton.setBounds(587, 329, 89, 43);
 		btnNewButton.addActionListener(new ActionListener() {
 			// Put the action for making the folder
 			public void actionPerformed(ActionEvent e) {
 				getUserInput();
 				System.out.println(fileName.length());
 				System.out.println("Selecting File");
+				
 			}
 		});
-		
+		panel.setLayout(null);
+		panel.add(btnNewButton);
 		
 
 		JButton btnNewButton_1 = new JButton("Open File");
+		btnNewButton_1.setBounds(493, 206, 105, 43);
 		btnNewButton_1.addActionListener(new ActionListener() {
 			// Put the action for Selecting File
 			public void actionPerformed(ActionEvent e) {
@@ -175,10 +202,10 @@ public class GUI{
 					}
 			}
 		});
-		
+		panel.add(btnNewButton_1);
 
 		JButton btnStart = new JButton("Start");
-
+		btnStart.setBounds(299, 206, 105, 43);
 		btnStart.addActionListener(new ActionListener() {
 			// Put the action to Start the Program
 			public void actionPerformed(ActionEvent e) {
@@ -189,84 +216,80 @@ public class GUI{
 					}
 			}
 		});
+		panel.add(btnStart);
+		
+		JPanel panel_1 = new JPanel() {
+			
+			@Override
+			public void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				int w = this.getWidth(), h = this.getHeight();
+
+				Image img = backgroundImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+				System.out.println(w + "  " + h + " img " + img);
+				g.drawImage(img, 0, 0, w, h, null);
+			}
+		};
+		tabbedPane.addTab("New tab", null, panel_1, null);
+	
+		
 		JButton btnNewButton_2 = new JButton("Show Directory");
+		btnNewButton_2.setBounds(1020, 208, 105, 43);
 		btnNewButton_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				getDirectory(fileName);
+				getDirectory(new File(fileName.getParent()));
 			}
 		});
+		panel.add(btnNewButton_2);
 		
-		JButton btnNewButton_3 = new JButton("NIGGA");
+		JButton btnNewButton_3 = new JButton("password remove");
+		btnNewButton_3.setBounds(674, 206, 105, 43);
 		btnNewButton_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			
-				if(changer) {
-				frame.add(pnlChart, BorderLayout.EAST);
-				frame.validate();
-				frame.repaint();
-				}
-				else {
-					frame.remove(pnlChart);
-					frame.validate();
-					frame.repaint();
-				}
-				changer=!changer;
-				
-			
-				
+				Preferences UserPrefs = Preferences.userNodeForPackage(Runner.class);
+				UserPrefs.remove("password");
 			}
 		});
-		
-		JButton btnNewButton_4 = new JButton("New button");
+		panel.add(btnNewButton_3);
+		JButton btnNewButton_4 = new JButton("niga");
+		btnNewButton_4.setBounds(850, 206, 105, 43);
 		btnNewButton_4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				frame.remove(pnlChart);
-				frame.revalidate();
-				frame.repaint();
-			}
-	});
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(359)
-					.addComponent(btnStart))
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(27)
-					.addComponent(btnNewButton_3)
-					.addGap(34)
-					.addComponent(btnNewButton_2)
-					.addGap(34)
-					.addComponent(btnNewButton_4))
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(46)
-					.addComponent(btnNewButton)
-					.addGap(80)
-					.addComponent(btnNewButton_1, GroupLayout.PREFERRED_SIZE, 102, GroupLayout.PREFERRED_SIZE))
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(58)
-					.addComponent(btnStart, GroupLayout.PREFERRED_SIZE, 269, GroupLayout.PREFERRED_SIZE))
-		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(91)
-					.addComponent(btnStart)
-					.addGap(98)
-					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(btnNewButton_3)
-						.addComponent(btnNewButton_2)
-						.addComponent(btnNewButton_4))
-					.addGap(68)
-					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
-						.addGroup(gl_panel.createSequentialGroup()
-							.addGap(2)
-							.addComponent(btnNewButton_1, GroupLayout.PREFERRED_SIZE, 37, GroupLayout.PREFERRED_SIZE)))
-					.addGap(50)
-					.addComponent(btnStart, GroupLayout.PREFERRED_SIZE, 31, GroupLayout.PREFERRED_SIZE))
-		);
-		panel.setLayout(gl_panel);
+
+				
+					createChart();
+					pnlChart=new XChartPanel(chart);
+					panel_1.add(pnlChart);
+					frame.validate();
+					frame.repaint();
+					
+			
+				
+				
+				}
+		});
+		
+		panel.add(btnNewButton_4);
+		JLabel lblFileOrganizer = new JLabel("File Organizer");
+		lblFileOrganizer.setBounds(534, 89, 259, 57);
+		lblFileOrganizer.setFont(new Font("Segoe Print", Font.BOLD, 32));
+		lblFileOrganizer.setHorizontalAlignment(SwingConstants.CENTER);
+		panel.add(lblFileOrganizer);
+		
+		
+		JButton btnNewButton_5 = new JButton("New button");
+		btnNewButton_5.setBounds(390, 329, 89, 43);
+		panel.add(btnNewButton_5);
+		
+		JButton btnNewButton_6 = new JButton("New button");
+		btnNewButton_6.setBounds(773, 329, 89, 43);
+		panel.add(btnNewButton_6);
+		
+//		JButton btnNewButton_7 = new JButton("New button");
+//		btnNewButton_7.setBounds(587, 329, 89, 43);
+//		panel.add(btnNewButton_7);
+
+
 
 	}	
 		
@@ -451,54 +474,119 @@ public class GUI{
 		return img;
 	}
 	
-	public void getDirectory(File fileName) {
+	public void getDirectory (File fileName) {
 			
-
+		File[] fList=fileName.listFiles();
+		    
 		    // Get all files from a directory.
 		
-		    File[] fList = new File(fileName.getParent()).listFiles();
+		 
 		    
-		   
-		    System.out.println("a");
-		   
-		    List<String> filesSize = new ArrayList<String>();
 		    
-		    if(fList != null)
-		        for (File file : fList) {      
-		            if (file.isFile()) {
-		            	if(file.length()>100000000)
-		                filesSize.add(file.getPath()+", "+df.format(file.length()/1000000000.0)+"GB");
-		            	if(file.length()>1000000&&file.length()<100000000)
-		            		filesSize.add(file.getPath()+", "+df.format(file.length()/1000000.0)+"MB");
-		            	if(file.length()>1000&&file.length()<1000000)
-		            		filesSize.add(file.getPath()+", "+df.format(file.length()/1000)+"KB");
+	
+		    
+		 //   if(fList != null)
+		        for (File file : fList) {   
+		        	
+		        	if (file.isFile()) {
+		        		fileContainer.add(new FileData(file.length(),file.getName()));
+		        		
+//		            	if(fileList.indexOf(getFileExtension(file.getPath()))>=0){
+//		            		
+//		            		fileSizes.add(fileList.indexOf(getFileExtension(file.getPath())),Integer.toString(((int)file.length())));
+		            		//if(fileSizes.size()>0) {
+		            		//	fileSizes.remove(fileList.indexOf(getFileExtension(file.getPath())));
+		            		//}
+//		            	}
+//		            	else {
+//		            		fileList.add(getFileExtension(file.getAbsolutePath()));
+//		            		fileSizes.add(Integer.toString((int)file.length()));
+//		            	}
+//		            	if(file.length()>1000000000)
+//		                filesSize.add(file.getPath()+", "+df.format(file.length()/1000000000.0)+"GB");
+//		            	if(file.length()>1000000&&file.length()<100000000)
+//		            		filesSize.add(file.getPath()+", "+df.format(file.length()/1000000.0)+"MB");
+//		            	if(file.length()>1000&&file.length()<1000000)
+//		            		filesSize.add(file.getPath()+", "+df.format(file.length()/1000.0)+"KB");
 		            	}
+		        	
+		        	
+		        		if(file.isDirectory()) {
+		        			System.out.println(file.getName());
+		        			getDirectory(file);
+		        	
 		            	
-		        }
-			System.out.println(filesSize);
+		        		}
+		        		
+		        	}
+		       
+		        
+		   
+		   //return fileList;
+		  
 		    }
-
-	public void createChart() {
-		chart = new PieChartBuilder().width(500).height(500).title("My Pie Chart").theme(ChartTheme.GGPlot2).build();
-		System.out.println(frame.getWidth());
-	    // Customize Chart
-	    chart.getStyler().setLegendVisible(false);
-	    chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
-	    chart.getStyler().setAnnotationDistance(1.15);
-	    chart.getStyler().setPlotContentSize(.7);
-	    chart.getStyler().setStartAngleInDegrees(90);
-
-	    // Series
-	    //A
-	    chart.addSeries("Prague", 2);
-	    chart.addSeries("Dresden", 4);
-	    chart.addSeries("Munich", 34);
-	    chart.addSeries("Hamburg", 22);
-	    chart.addSeries("Berlin", 29);
-	    
+	
+	public void checkDupe() {
+		int count=0;
+	for(int x=0;x<fileContainer.size();x++){
+		for(int y=0;y<fileContainer.size();y++) {
+			if(fileContainer.get(x)!=null&&fileContainer.get(y)!=null&&fileContainer.get(x).compareTo(fileContainer.get(y))==0&&(x!=y)){
+				fileContainer.get(x).merge(fileContainer.get(y));
+				fileContainer.set(x,null);
+			}
+		}
 	}
+	if(count>0) {
+		checkDupe();
+	}
+	}
+	
+	
+	public void createChart() {
+		chart = new PieChartBuilder().width((int) dm.getWidth()-300).height((int) dm.getHeight()-300).title(fileName.getParent()).theme(ChartTheme.GGPlot2).build();
+		System.out.println(frame.getWidth());
+		// Customize Chart
+		chart.getStyler().setLegendVisible(true);
+		chart.getStyler().setAnnotationType(AnnotationType.LabelAndPercentage);
+		chart.getStyler().setAnnotationDistance(1.15);
+		chart.getStyler().setPlotContentSize(.7);
+		chart.getStyler().setStartAngleInDegrees(90);
+		getDirectory(new File(fileName.getParent()));
+		checkDupe();
+			while(fileContainer.remove(null));
+		
+			for(int x=0;x<fileContainer.size();x++) {
+				System.out.println(fileContainer.get(x).getName());
+				System.out.println(fileContainer.get(x).getSize());
+			}
+		
+			System.out.println(fileContainer.size());
+			for(int x=0; x<fileContainer.size();x++) {
+				if(fileContainer.get(x).fileExtension()!=""&&fileContainer.get(x)!=null) {
+				
+			chart.addSeries(fileContainer.get(x).fileExtension()+fixedName(fileContainer.get(x).getSize()),fileContainer.get(x).getSize());
+				}
+			
+		}
+		
 
+	}
+	public String fixedName(long size) {
+		if(size>1000000000)
+            return(", "+df.format(size/1000000000.0)+"GB");
+        	if(size>1000000&&size<1000000000)
+        		return(", "+df.format(size/1000000.0)+"MB");
+        	if(size>0&&size<1000000)
+        		return(", "+df.format(size/1000.0)+"KB");
+        	else {
+        		return"nigga";
+        	}
+			
+	}
+	
+	
+
+	
 }
-
 	
 

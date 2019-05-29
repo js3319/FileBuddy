@@ -1,34 +1,50 @@
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.knowm.xchart.XChartPanel;
 
+import org.knowm.xchart.PieChart;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.awt.BorderLayout;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Properties;
+import java.util.Scanner;
+import java.util.prefs.Preferences;
 import java.io.IOException;
 
-import org.knowm.xchart.BitmapEncoder;
-import org.knowm.xchart.BitmapEncoder.BitmapFormat;
-import org.knowm.xchart.PieChart;
-import org.knowm.xchart.PieChartBuilder;
-import org.knowm.xchart.SwingWrapper;
-import org.knowm.xchart.style.PieStyler.AnnotationType;
-import org.knowm.xchart.style.Styler.ChartTheme;
 
-
-
-public class Runner{
+public class Runner {
 	String input;
 	String change;
 	Desktop desktop;
 	File file;
 	GUI window;
+	boolean passed=false;
+	int count =3;	
+	private String password;
+	String defaultPass="password";
+	Preferences UserPrefs = Preferences.userNodeForPackage(Runner.class);
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 	public Runner() {
 		EventQueue.invokeLater(new Runnable() {
@@ -36,17 +52,30 @@ public class Runner{
 			public void run() {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-					window = new GUI();
 					
-					checkOS();
-					window.frame.setVisible(true);
+					if(UserPrefs.get("password",defaultPass)!=defaultPass)
+						password=UserPrefs.get("password",defaultPass);
+					
+					
+					checkPass();
+					System.out.println(password);
+					passwordCreator();
+					
+					
+					
 					//start();
 				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
 				}
 			}
 		});
 	} 
-	
+	public static void main(String[]args) {
+		
+		Runner run = new Runner();		
+		
+		
+
+	}
 
 
 	public void getUserInput() {
@@ -148,20 +177,122 @@ public class Runner{
 		else {
 			window.setOS("\\");
 		}
-	}
 	
+	}
+	public void passwordCreator() {
+	JFrame frame = new JFrame("Password");
+	
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setSize(400,100);
+	frame.setLocationRelativeTo(null);	
+	JLabel label = new JLabel("Enter password");
+	JPanel panel = new JPanel();
+	frame.add(panel);
+	
+	JPasswordField pass = new JPasswordField(10);
+	pass.setEchoChar('*');
+	pass.addActionListener(new AL());
+	panel.add(label, BorderLayout.WEST);
+	panel.add(pass, BorderLayout.EAST);
 
-
-	public static void main(String[]args) throws IOException {
-		Runner run = new Runner();		
+	frame.setVisible(true);
+	
+	}
+	class AL implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			
+		
+		JPasswordField input = (JPasswordField) e.getSource();
+		char[]passy=input.getPassword();
+		String p = new String(passy);
+		int y= 0;
+		
+		if(count>0) {
+		if(hashConverter(p).equals(password)) {
+			JOptionPane.showMessageDialog(null, "Correct");
+			passed=true;
+		
+				
+				window = new GUI();
+				checkOS();
+				window.frame.setVisible(true);
+				
+			
+		}
+		if(!(hashConverter(p).equals(password))) {
+			JOptionPane.showMessageDialog(null, "Incorrect, you have "+count+" tries left");
+			count--;
+		}
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "Locked");
+		}
+		}
+	
 		
 	}
+	
+	public String hashConverter(String password){
+		String passwordToHash = password;
+        String generatedPassword = null;
+        try {
+            // Create MessageDigest instance for MD5
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            //Add password bytes to digest
+            md.update(passwordToHash.getBytes());
+            //Get the hash's bytes
+            byte[] bytes = md.digest();
+            //This bytes[] has bytes in decimal format;
+            //Convert it to hexadecimal format
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i< bytes.length ;i++)
+            {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            //Get complete hashed password in hex format
+            generatedPassword = sb.toString();
+            return generatedPassword;
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+      	generatedPassword=password;
+      	return generatedPassword;
+    }
+	public void checkPass() {
+		if (!(password !=null &&  !password.isEmpty())) {			
+			JFrame setPass = new JFrame("Set Password");
+			password=hashConverter(JOptionPane.showInputDialog(setPass, "Set password"));
+			Image image = getImage("files.png");
+			setPass.setIconImage(image);
+			setPass.setSize(400,100);
+			setPass.setLocationRelativeTo(null);			
+			setPass.setVisible(true);
+			
+			UserPrefs.put("password", password);
+			
+			
+			}
+	}
+	public void remove() {
+	 UserPrefs.remove("password");
 	}
 	
 	
-	
+	public Image getImage(String str) {
+		Image img = null;
+		try {
+			img = ImageIO.read(this.getClass().getResource("res/images/" + str));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return img;
+	}
 
 
+}
 
 
 
